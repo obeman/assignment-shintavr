@@ -2,9 +2,10 @@ const express = require("express");
 var router = express.Router();
 const collectionName = "posts";
 const { firestore, auth } = require("../config/firebase.js");
+const Middleware = require('../middleware/validation.js');
 
 router.post("/create-post", async (req, res) => {
-  const collectionRef = firestore.collection(collectionName);
+  const collectionRef = await firestore.collection(collectionName);
 
   const querySnapshot = await collectionRef.get();
 
@@ -24,7 +25,7 @@ router.post("/create-post", async (req, res) => {
     });
 });
 
-router.post('/all-posts', async (req, res) => {
+router.post('/all-posts', Middleware.decodeToken, async (req, res) => {
     try {
         const name = req.body.name;
 

@@ -1,4 +1,5 @@
 const firebase = require("firebase/compat/app");
+const admin = require("firebase-admin");
 require("firebase/compat/auth");
 require("firebase/compat/firestore");
 require('dotenv').config();
