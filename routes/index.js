@@ -18,7 +18,6 @@ app.get('/', (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         const loginResult = await doLogin();
-        console.log(loginResult);
         res.status(200).send(loginResult);
     } catch (error) {
         res.status(500).send('Error: ' + error);

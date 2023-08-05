@@ -1,5 +1,6 @@
 const firebase = require("firebase/compat/app");
 const admin = require("firebase-admin");
+
 require("firebase/compat/auth");
 require("firebase/compat/firestore");
 require('dotenv').config();
@@ -14,6 +15,6 @@ const firebaseConfig = {
 };
   
   // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
+  exports.app = firebase.initializeApp(firebaseConfig);
   exports.firestore = firebase.firestore();
   exports.auth = firebase.auth();
