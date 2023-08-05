@@ -37,7 +37,6 @@ router.post("/create-post", Middleware.decodeToken, async (req, res) => {
 
 router.post("/all-posts", Middleware.decodeToken, async (req, res) => {
   try {
-    const name = req.body.name;
 
     const collectionRef = firestore.collection(collectionName);
 
@@ -60,40 +59,49 @@ router.post("/all-posts", Middleware.decodeToken, async (req, res) => {
 });
 
 router.post("/update-post", Middleware.decodeToken, async (req, res) => {
-  try {
-    const id = req.body.id;
+    const id = req.body.docId;
 
-    const collectionRef = firestore.collection(collectionName);
-    const querySnapshot = await collectionRef.where("id", "==", id).get();
+    const collectionRef = firestore.collection(collectionName)
+    const documentRef = collectionRef.doc(id);
+    const documentData = (await documentRef.get()).data();
 
-    if (querySnapshot.empty) {
-      // If the document does not exist, send a response indicating it doesn't exist
-      return res.status(404).json({ message: "Document not found" });
+    if(documentData.name != req.body.username) {
+        res.status(401).json({error: 'Update Function error: Unauthorized Access'})
+    }else{
+        await documentRef.update({
+            body : req.body.body,
+        }).then((updated) => {
+            res.status(200).json({ message: "Document successfully updated" });
+        }).catch((err) => {
+            console.error("Error updating document:", err);
+            res.status(500).json({ err: "Failed to update document" });
+        });
     }
-    // console.log(querySnapshot);
-
-    const documentSnapshot = querySnapshot.docs[0];
-    await documentSnapshot.ref.update(req.body);
-
-    res.status(200).json({ message: "Document successfully updated" });
-  } catch (error) {
-    console.error("Error updating document:", error);
-    res.status(500).json({ error: "Failed to update document" });
-  }
 });
 
 router.post("/delete-post", Middleware.decodeToken, async (req, res) => {
   try {
     const id = req.body.id;
+    console.log("idzap : ",id);
 
     const collectionRef = firestore.collection(collectionName);
-    await collectionRef.doc(id).delete();
+    const documentRef = collectionRef.doc(id);
 
-    res.status(200).json({ message: "Document successfully deleted" });
+    const documentData = (await documentRef.get()).data();
+    console.log("document data obe : ", documentData.name);
+    console.log("username : ", req.body.username)
+
+    if(documentData.name != req.body.username) {
+        res.status(401).json({error: 'Delete Function error: Unauthorized Access'})
+    }else{
+        await collectionRef.doc(id).delete();
+        res.status(200).json({ message: "Document successfully deleted" });
+    }    
   } catch (error) {
     console.error("Error delete document:", error);
     res.status(500).json({ error: "Failed to delete document" });
   }
 });
+
 
 module.exports = router;
