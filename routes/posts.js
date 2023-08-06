@@ -1,32 +1,22 @@
 const express = require("express");
 var router = express.Router();
 const collectionName = "posts";
-const { firestore, auth, app } = require("../config/firebase.js");
+const { firestore } = require("../config/firebase.js");
 const Middleware = require("../middleware/validation.js");
-const admin = require("firebase-admin");
 const { Timestamp } = require("firebase-admin/firestore");
 
 router.post("/create-post", Middleware.decodeToken, async (req, res) => {
   const collectionRef = await firestore.collection(collectionName);
 
-  const querySnapshot = await collectionRef.get();
-
-  const collectionSize = querySnapshot.size;
   const timestampNow = Timestamp.now();
-
-  req.body.id = collectionSize + 1;
-
-  console.log("zap time: ", timestampNow);
 
   collectionRef
     .add({
-      id: req.body.id,
-      name: req.body.name,
+      name: req.body.user.displayName,
       body: req.body.body,
       timestamp: timestampNow.toDate(),
     })
     .then((docRef) => {
-      //   console.log("Document written with ID:", docRef.id);
       res.status(200).json(req.body);
     })
     .catch((error) => {
@@ -44,7 +34,6 @@ router.post("/all-posts", Middleware.decodeToken, async (req, res) => {
 
     const posts = [];
     querySnapshot.forEach((doc) => {
-      // console.log(doc.data());
       posts.push({
         ...doc.data(),
         docId: doc.id,
@@ -65,7 +54,7 @@ router.post("/update-post", Middleware.decodeToken, async (req, res) => {
     const documentRef = collectionRef.doc(id);
     const documentData = (await documentRef.get()).data();
 
-    if(documentData.name != req.body.username) {
+    if(documentData.name != req.body.user.displayName) {
         res.status(401).json({error: 'Update Function error: Unauthorized Access'})
     }else{
         await documentRef.update({
@@ -82,16 +71,13 @@ router.post("/update-post", Middleware.decodeToken, async (req, res) => {
 router.post("/delete-post", Middleware.decodeToken, async (req, res) => {
   try {
     const id = req.body.id;
-    console.log("idzap : ",id);
 
     const collectionRef = firestore.collection(collectionName);
     const documentRef = collectionRef.doc(id);
 
     const documentData = (await documentRef.get()).data();
-    console.log("document data obe : ", documentData.name);
-    console.log("username : ", req.body.username)
 
-    if(documentData.name != req.body.username) {
+    if(documentData.name != req.body.user.displayName) {
         res.status(401).json({error: 'Delete Function error: Unauthorized Access'})
     }else{
         await collectionRef.doc(id).delete();

@@ -12,7 +12,7 @@ class Middleware {
 
     try {
       // Verify the token using the Firebase Admin SDK
-      const decodedToken = await getAuth().verifyIdToken(token);
+      await getAuth().verifyIdToken(token);
 
       return next();
     } catch (error) {

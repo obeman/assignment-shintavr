@@ -7,6 +7,7 @@ const serviceAccount = require(`./config/assignment-shintavr-cert.json`)
 
 
 var postsRouter = require("./routes/posts");
+var profilesRouter = require("./routes/profiles");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -17,6 +18,7 @@ app.use(cors());
 
 
 app.use("/posts", postsRouter);
+app.use("/profiles", profilesRouter);
 
 
 module.exports = app;
